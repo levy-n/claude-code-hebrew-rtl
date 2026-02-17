@@ -66,11 +66,27 @@ else
     fail "mintty not found at /usr/bin/mintty.exe. Reinstall Git for Windows."
 fi
 
-# Build icon path relative to Git root
-ICON_WIN="${GIT_ROOT_WIN}mingw64\\share\\git\\git-for-windows.ico"
+# Build icon paths
+GIT_ICON_WIN="${GIT_ROOT_WIN}mingw64\\share\\git\\git-for-windows.ico"
 if [ ! -f "/mingw64/share/git/git-for-windows.ico" ]; then
-    warn "Git icon not found - shortcuts will use default icon"
-    ICON_WIN=""
+    warn "Git icon not found - Git Bash shortcut will use default icon"
+    GIT_ICON_WIN=""
+fi
+
+# Install Claude Code custom icon to ~/.claude/
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_ICON_SRC="$SCRIPT_DIR/claude-code-logo.ico"
+CLAUDE_ICON_DIR="$HOME/.claude"
+CLAUDE_ICON_DEST="$CLAUDE_ICON_DIR/claude-code-logo.ico"
+
+mkdir -p "$CLAUDE_ICON_DIR"
+if [ -f "$CLAUDE_ICON_SRC" ]; then
+    cp "$CLAUDE_ICON_SRC" "$CLAUDE_ICON_DEST"
+    CLAUDE_ICON_WIN=$(cygpath -w "$CLAUDE_ICON_DEST" 2>/dev/null)
+    ok "Claude Code icon installed to ~/.claude/"
+else
+    warn "claude-code-logo.ico not found next to script - using Git icon as fallback"
+    CLAUDE_ICON_WIN="$GIT_ICON_WIN"
 fi
 
 ###############################################################################
@@ -296,35 +312,37 @@ else
     # Pass values via environment variables to avoid path escaping issues
     export _CLAUDE_DESKTOP="$DESKTOP_WIN"
     export _CLAUDE_MINTTY="$MINTTY_WIN"
-    export _CLAUDE_ICON="$ICON_WIN"
+    export _CLAUDE_ICON="$CLAUDE_ICON_WIN"
+    export _CLAUDE_GIT_ICON="$GIT_ICON_WIN"
     export _CLAUDE_PROJDIR_WIN="$WIN_PROJECT_DIR"
     export _CLAUDE_PROJDIR_BASH="$BASH_PROJECT_DIR"
 
     cat > "$PS_SCRIPT" << 'PSEOF'
-$desktop  = $env:_CLAUDE_DESKTOP
-$mintty   = $env:_CLAUDE_MINTTY
-$icon     = $env:_CLAUDE_ICON
-$projWin  = $env:_CLAUDE_PROJDIR_WIN
-$projBash = $env:_CLAUDE_PROJDIR_BASH
+$desktop    = $env:_CLAUDE_DESKTOP
+$mintty     = $env:_CLAUDE_MINTTY
+$claudeIcon = $env:_CLAUDE_ICON
+$gitIcon    = $env:_CLAUDE_GIT_ICON
+$projWin    = $env:_CLAUDE_PROJDIR_WIN
+$projBash   = $env:_CLAUDE_PROJDIR_BASH
 
 $WshShell = New-Object -ComObject WScript.Shell
 
-# Shortcut 1: Claude Code (Hebrew)
+# Shortcut 1: Claude Code (Hebrew) - uses Claude logo
 $s1 = $WshShell.CreateShortcut("$desktop\Claude Code (Hebrew).lnk")
 $s1.TargetPath = $mintty
 $s1.Arguments = "-i /mingw64/share/git/git-for-windows.ico -e /usr/bin/bash --login -c ""source ~/.bashrc 2>/dev/null; cd '$projBash' 2>/dev/null; claude; exec bash -i"""
 $s1.WorkingDirectory = $projWin
 $s1.Description = "Claude Code in Git Bash with Hebrew RTL support"
-if ($icon) { $s1.IconLocation = $icon }
+if ($claudeIcon) { $s1.IconLocation = $claudeIcon }
 $s1.Save()
 
-# Shortcut 2: Git Bash Hebrew
+# Shortcut 2: Git Bash Hebrew - uses Git icon
 $s2 = $WshShell.CreateShortcut("$desktop\Git Bash Hebrew.lnk")
 $s2.TargetPath = $mintty
 $s2.Arguments = "-i /mingw64/share/git/git-for-windows.ico -e /usr/bin/bash --login -i"
 $s2.WorkingDirectory = $projWin
 $s2.Description = "Git Bash with Hebrew RTL support"
-if ($icon) { $s2.IconLocation = $icon }
+if ($gitIcon) { $s2.IconLocation = $gitIcon }
 $s2.Save()
 
 Write-Host "OK" -NoNewline
@@ -335,7 +353,7 @@ PSEOF
     rm -f "$PS_SCRIPT"
 
     # Clean up env vars
-    unset _CLAUDE_DESKTOP _CLAUDE_MINTTY _CLAUDE_ICON _CLAUDE_PROJDIR_WIN _CLAUDE_PROJDIR_BASH
+    unset _CLAUDE_DESKTOP _CLAUDE_MINTTY _CLAUDE_ICON _CLAUDE_GIT_ICON _CLAUDE_PROJDIR_WIN _CLAUDE_PROJDIR_BASH
 
     if [ -f "$DESKTOP_UNIX/Claude Code (Hebrew).lnk" ]; then
         ok "Created: Claude Code (Hebrew)"
