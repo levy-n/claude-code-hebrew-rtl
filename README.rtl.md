@@ -22,7 +22,7 @@ Git Bash (mintty) תומך ב-BiDi באופן מובנה. הסקריפט מגד�
 פותחים Git Bash ומריצים:
 
 ```bash
-git clone https://github.com/NatiLevyy/claude-code-hebrew-rtl.git
+git clone https://github.com/levy-n/claude-code-hebrew-rtl.git
 cd claude-code-hebrew-rtl
 bash setup.sh
 ```
@@ -30,7 +30,7 @@ bash setup.sh
 או בלי clone:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NatiLevyy/claude-code-hebrew-rtl/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/levy-n/claude-code-hebrew-rtl/main/setup.sh | bash
 ```
 
 ## מה הסקריפט עושה

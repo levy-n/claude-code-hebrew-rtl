@@ -22,7 +22,7 @@ CMD and PowerShell don't support BiDi text rendering. Hebrew appears reversed an
 Open **Git Bash** and run:
 
 ```bash
-git clone https://github.com/NatiLevyy/claude-code-hebrew-rtl.git
+git clone https://github.com/levy-n/claude-code-hebrew-rtl.git
 cd claude-code-hebrew-rtl
 bash setup.sh
 ```
@@ -30,7 +30,7 @@ bash setup.sh
 Or without cloning:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NatiLevyy/claude-code-hebrew-rtl/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/levy-n/claude-code-hebrew-rtl/main/setup.sh | bash
 ```
 
 ## What the Script Does
